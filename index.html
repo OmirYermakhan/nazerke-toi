@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Назеркенің ұзату тойына шақыру</title>
+<meta name="description" content="2026 жылғы 11 қараша, сәрсенбі. Келетініңізді растаңыз.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Назеркенің ұзату тойына шақыру">
+<meta property="og:description" content="2026 жылғы 11 қараша, сәрсенбі. Келетініңізді растаңыз.">
+<meta name="theme-color" content="#F2F0EE">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Great+Vibes&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4F2F0;
+    --ink: #5A5450;
+    --soft: #8B847E;
+    --gold: #B08A6E;
+    --line: rgba(176, 138, 110, .55);
+    --script: "Great Vibes", "Cormorant Garamond", cursive;
+    --serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+    /* компьютерде шақыру телефон пішініндей бағанда тұрады; барлық өлшем сол бағанның еніне байланған */
+    --w: min(100vw, calc(100vh * .5625 + 60px));
+    --w: min(100vw, calc(100dvh * .5625 + 60px));
+    --u: calc(var(--w) / 100);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; overflow: hidden; background: #DAD7D3; -webkit-text-size-adjust: 100%; }
+  body { font-family: var(--serif); font-weight: 500; color: var(--ink); text-align: center; font-variant-numeric: lining-nums; }
+  h1, h2, p, fieldset { margin: 0; padding: 0; font-weight: inherit; font-size: inherit; }
+  button, input { font: inherit; color: inherit; }
+  img { display: block; user-select: none; -webkit-user-drag: none; }
+  [hidden] { display: none !important; }
+  :focus-visible { outline: 1px solid var(--gold); outline-offset: 4px; }
+
+  .stage {
+    position: fixed; top: 0; left: 50%; width: var(--w); height: 100vh; height: 100dvh; margin-left: calc(var(--w) / -2);
+    overflow: hidden; overflow: clip; background: var(--paper); box-shadow: 0 0 calc(var(--u) * 18) rgba(70, 60, 52, .22);
+    font-size: calc(var(--u) * 4.3); line-height: 1.45; cursor: pointer; -webkit-tap-highlight-color: transparent;
+  }
+  .stage.end { cursor: auto; }
+
+  /* Қағаз: түйіршік пен баяу жылжитын жарық жолағы */
+  .grain {
+    position: absolute; inset: 0; z-index: 3; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .48 0 0 0 0 .46 0 0 0 .16 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .light {
+    position: absolute; inset: -25% -60%; z-index: 4; pointer-events: none; mix-blend-mode: multiply;
+    background: linear-gradient(116deg,
+      rgba(136, 132, 128, .62) 0%, rgba(150, 146, 142, .44) 24%, rgba(255, 255, 255, 0) 41%,
+      rgba(255, 255, 255, 0) 56%, rgba(150, 146, 142, .40) 76%, rgba(132, 128, 124, .60) 100%);
+    animation: drift 16s ease-in-out infinite alternate;
+  }
+  @keyframes drift { from { transform: translate3d(-7%, -3%, 0); } to { transform: translate3d(7%, 3%, 0); } }
+
+  /* Көріністер: мәтін бұлдырдан шығады, гүлдер баяу қалқып келеді */
+  .scene { position: absolute; inset: 0; visibility: hidden; pointer-events: none; transition: visibility 0s 1.3s; }
+  .scene.on { visibility: visible; transition-delay: 0s; }
+  .t { opacity: 0; filter: blur(calc(var(--u) * 2.6)); transition: opacity 1s ease, filter 1s ease; will-change: opacity, filter; }
+  .scene.on .t { opacity: 1; filter: blur(0); transition-duration: 1.5s; transition-delay: var(--d, .7s); }
+  .f {
+    position: absolute; height: auto; opacity: 0; filter: blur(calc(var(--u) * 2)); transform: var(--from);
+    transition: opacity 1.1s ease, filter 1.1s ease, transform 1.3s ease; will-change: opacity, transform;
+  }
+  .scene.on .f {
+    opacity: 1; filter: blur(0); transform: var(--to, none);
+    transition: opacity 1.8s ease var(--fd, 0s), filter 1.8s ease var(--fd, 0s), transform 8s cubic-bezier(.16, .6, .3, 1) var(--fd, 0s);
+  }
+  .txt { position: absolute; left: 0; right: 0; padding: 0 calc(var(--u) * 9); }
+
+  .it { font-style: italic; font-weight: 400; font-size: calc(var(--u) * 5.1); letter-spacing: .02em; color: var(--ink); }
+  .caps { text-transform: uppercase; letter-spacing: .16em; font-size: calc(var(--u) * 5.2); line-height: 1.5; }
+  .caps.sm { font-size: calc(var(--u) * 3.5); letter-spacing: .2em; }
+  .caps.lg { font-size: calc(var(--u) * 6.6); letter-spacing: .14em; line-height: 1.3; }
+  .script { font-family: var(--script); font-weight: 400; line-height: 1.1; color: #6A615B; }
+
+  /* 0 — мұқаба */
+  .s0 .f { left: 19%; top: 25%; width: 62%; --from: translateY(4%) scale(.96); }
+  .s0 .txt { top: 43%; }
+  .s0 .guest { min-height: 1.5em; }
+  .s0 .title { margin-top: calc(var(--u) * 3); }
+  .s0 .who { margin-top: calc(var(--u) * 2); color: var(--soft); }
+  .open {
+    display: inline-block; margin-top: calc(var(--u) * 12); padding: calc(var(--u) * 3.2) calc(var(--u) * 11);
+    border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, .45); cursor: pointer;
+    text-transform: uppercase; letter-spacing: .28em; text-indent: .28em; font-size: calc(var(--u) * 3.7);
+    animation: breathe 2.8s ease-in-out infinite;
+  }
+  @keyframes breathe { 50% { box-shadow: 0 0 0 calc(var(--u) * 2.4) rgba(176, 138, 110, .13); } }
+  .s0.on, .s0.on * { pointer-events: auto; }
+
+  /* 1 — есім */
+  .s1 .f { top: -5%; right: -22%; width: 104%; --from: translate(7%, -5%) scale(1.07); }
+  .s1 .txt { top: 62%; }
+  .s1 .script { font-size: calc(var(--u) * 23); }
+  .s1 .caps { margin-top: calc(var(--u) * 1.5); --d: 1.3s; }
+
+  /* 2 — той иелері */
+  .s2 .f { left: 17%; top: 45%; width: 66%; --from: translateX(-5%) scale(.95); --fd: .2s; }
+  .s2 .txt { top: 27%; }
+  .s2 .caps { margin-top: calc(var(--u) * 1.5); --d: 1.2s; }
+
+  /* 3 — шақыру */
+  .s3 .f { top: -3%; left: -14%; width: 118%; --from: translate(-5%, -4%) scale(1.06); }
+  .s3 .txt { top: 66%; }
+  .s3 .caps { margin: calc(var(--u) * 1.5) 0; --d: 1.2s; }
+  .s3 .it + .caps + .it { --d: 1.7s; }
+
+  /* 4 — күні */
+  .s4 .f.a { top: -4%; right: -62%; width: 150%; --from: translate(6%, -6%) scale(1.05); }
+  .s4 .f.b { bottom: -4%; left: -62%; width: 150%; --from: translate(-6%, 6%) rotate(180deg) scale(1.05); --to: rotate(180deg); --fd: .3s; }
+  .s4 .txt { top: 39%; }
+  .s4 .day { font-style: italic; font-weight: 400; font-size: calc(var(--u) * 15.5); line-height: 1.1; letter-spacing: .01em; color: #4C4642; }
+  .s4 .caps { margin-top: calc(var(--u) * 3); --d: 1.3s; }
+
+  /* 5 — уақыты мен орны */
+  .s5 .f { bottom: -2%; left: -9%; width: 78%; --from: translate(-4%, 6%) scale(1.04); }
+  .s5 .txt { top: 24%; }
+  .s5 .caps.lg { margin: calc(var(--u) * 2) 0 calc(var(--u) * 1); --d: 1.2s; }
+  .s5 .caps.sm { --d: 1.6s; }
+
+  /* 6 — қорытынды бет */
+  .s6 { overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+  .s6.on { pointer-events: auto; }
+  .s6 .f { position: relative; width: 122%; margin: calc(var(--u) * -3) -11% 0; --from: translateY(-6%) scale(1.04); }
+  .card { padding: calc(var(--u) * 5) calc(var(--u) * 9) calc(var(--u) * 12); }
+  .card .script { font-size: calc(var(--u) * 21); margin: calc(var(--u) * 1) 0 calc(var(--u) * 5); --d: .9s; }
+  .card .caps.sm { line-height: 1.75; text-wrap: balance; }
+  .card .block { margin-top: calc(var(--u) * 5.5); --d: 1.3s; }
+  .card .block b { display: block; font-weight: 500; font-size: calc(var(--u) * 4.5); letter-spacing: .16em; }
+  .actions { display: grid; gap: calc(var(--u) * 2.6); margin-top: calc(var(--u) * 9); --d: 1.7s; }
+  .btn {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: calc(var(--u) * 13);
+    padding: calc(var(--u) * 2) calc(var(--u) * 4); border: 1px solid var(--line); border-radius: 999px;
+    background: rgba(255, 255, 255, .5); text-decoration: none; color: var(--ink); cursor: pointer;
+    text-transform: uppercase; letter-spacing: .2em; font-size: calc(var(--u) * 3.5); transition: background .2s, color .2s;
+  }
+  .btn.fill { background: var(--ink); border-color: var(--ink); color: #FBFAF8; }
+  .btn:active { transform: scale(.985); }
+  .again { margin-top: calc(var(--u) * 7); background: none; border: 0; cursor: pointer; font-style: italic; font-size: calc(var(--u) * 4.4); color: var(--soft); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .3em; }
+
+  /* Жауап */
+  .rsvp { margin-top: calc(var(--u) * 8); padding-top: calc(var(--u) * 7); border-top: 1px solid var(--line); text-align: left; }
+  .rsvp label.field { display: block; font-style: italic; color: var(--soft); }
+  .rsvp input[type="text"] {
+    display: block; width: 100%; padding: calc(var(--u) * 2) 0; border: 0; border-bottom: 1px solid var(--line); border-radius: 0;
+    background: none; font-size: calc(var(--u) * 5.4); font-weight: 500;
+  }
+  .rsvp input[type="text"]:focus { outline: 0; border-bottom-color: var(--ink); }
+  fieldset { border: 0; display: grid; gap: calc(var(--u) * 2.4); margin-top: calc(var(--u) * 5); }
+  .choice { position: relative; }
+  .choice input { position: absolute; opacity: 0; inset: 0; }
+  .choice span { display: flex; align-items: center; justify-content: center; min-height: calc(var(--u) * 13); padding: calc(var(--u) * 2) calc(var(--u) * 4); border: 1px solid var(--line); border-radius: 999px; font-size: calc(var(--u) * 4.6); cursor: pointer; text-align: center; }
+  .choice input:checked + span { background: var(--ink); border-color: var(--ink); color: #FBFAF8; }
+  .choice input:focus-visible + span { outline: 1px solid var(--gold); outline-offset: 3px; }
+  .step { display: flex; align-items: center; justify-content: space-between; padding: calc(var(--u) * 1.6) 0; margin-top: calc(var(--u) * 2); }
+  .step div { display: flex; align-items: center; }
+  .step button { width: calc(var(--u) * 11); height: calc(var(--u) * 11); border: 1px solid var(--line); border-radius: 50%; background: none; font-size: calc(var(--u) * 5.6); line-height: 1; cursor: pointer; }
+  .step output { width: calc(var(--u) * 12); text-align: center; font-size: calc(var(--u) * 5.6); }
+  .error { color: #9A5148; font-style: italic; min-height: 1.5em; margin: calc(var(--u) * 2) 0; text-align: center; }
+  .done { text-align: center; }
+  .done p { font-style: italic; font-size: calc(var(--u) * 5); margin-bottom: calc(var(--u) * 5); text-wrap: balance; }
+
+  /* Басқару */
+  .ctl { position: absolute; z-index: 6; opacity: 0; pointer-events: none; transition: opacity .8s; }
+  .stage.play .ctl, .stage .music { opacity: 1; pointer-events: auto; }
+  .music {
+    top: calc(var(--u) * 3.5); right: calc(var(--u) * 3.5); width: calc(var(--u) * 11); height: calc(var(--u) * 11); min-width: 40px; min-height: 40px;
+    border: 1px solid var(--line); border-radius: 50%; background: rgba(250, 249, 247, .8); cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 3px; padding: 0;
+  }
+  .music i { width: 2px; height: 5px; background: var(--gold); border-radius: 2px; }
+  .music.on i { animation: bar 1.1s ease-in-out infinite; }
+  .music.on i:nth-child(2) { animation-delay: .25s; }
+  .music.on i:nth-child(3) { animation-delay: .5s; }
+  .music.on i:nth-child(4) { animation-delay: .1s; }
+  @keyframes bar { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(3); } }
+  .skip {
+    right: calc(var(--u) * 5); bottom: max(calc(var(--u) * 5), env(safe-area-inset-bottom)); padding: calc(var(--u) * 2) calc(var(--u) * 1);
+    background: none; border: 0; cursor: pointer; font-style: italic; font-size: calc(var(--u) * 4.2); color: var(--soft);
+  }
+  .bar { left: 0; bottom: 0; height: 2px; width: 100%; background: var(--gold); transform-origin: left; transform: scaleX(0); opacity: 0; }
+  .stage.play .bar { opacity: .55; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .light, .open, .music.on i { animation: none; }
+    .t, .f, .scene.on .t, .scene.on .f { filter: none; transform: var(--to, none); transition: opacity .6s; }
+  }
+</style>
+</head>
+<body>
+
+<main class="stage" id="stage">
+  <section class="scene s0 on" data-s>
+    <img class="f" src="img/sprig.webp" alt="" width="629" height="284">
+    <div class="txt">
+      <p class="it t guest" id="guest"></p>
+      <h1 class="caps lg t title" style="--d:1s" data-t="coverTitle"></h1>
+      <p class="it t who" style="--d:1.3s" data-t="coverSub"></p>
+      <button class="open t" style="--d:1.8s" id="open" type="button" data-t="open"></button>
+    </div>
+  </section>
+
+  <section class="scene s1" data-s="6500">
+    <img class="f" src="img/spray.webp" alt="" width="743" height="1074">
+    <div class="txt">
+      <p class="script t" data-t="name"></p>
+      <p class="caps sm t" data-t="kind"></p>
+    </div>
+  </section>
+
+  <section class="scene s2" data-s="5800">
+    <div class="txt">
+      <p class="it t" data-t="hostsLabel"></p>
+      <p class="caps t" data-t="hosts"></p>
+    </div>
+    <img class="f" src="img/sprig.webp" alt="" width="629" height="284">
+  </section>
+
+  <section class="scene s3" data-s="7500">
+    <img class="f" src="img/garland.webp" alt="" width="888" height="1103">
+    <div class="txt">
+      <p class="it t" data-t="invite1"></p>
+      <p class="caps sm t" data-t="invite2"></p>
+      <p class="it t" data-t="invite3"></p>
+    </div>
+  </section>
+
+  <section class="scene s4" data-s="6500">
+    <img class="f a" src="img/top.webp" alt="" width="1344" height="396">
+    <img class="f b" src="img/top.webp" alt="" width="1344" height="396">
+    <div class="txt">
+      <p class="day t" data-t="weekday"></p>
+      <p class="caps t" data-t="dateCaps"></p>
+    </div>
+  </section>
+
+  <section class="scene s5" data-s="7000">
+    <div class="txt">
+      <p class="it t" data-t="timeLine"></p>
+      <p class="caps lg t" data-t="venueName"></p>
+      <p class="caps sm t" data-t="venueAddr"></p>
+    </div>
+    <img class="f" src="img/tulips.webp" alt="" width="880" height="903">
+  </section>
+
+  <section class="scene s6" data-s id="final">
+    <img class="f" src="img/top.webp" alt="" width="1344" height="396">
+    <div class="card">
+      <p class="caps sm t" data-t="kind"></p>
+      <h2 class="script t" data-t="name"></h2>
+      <p class="caps sm t" style="--d:1.1s" data-t="inviteFull"></p>
+      <p class="caps sm t block"><b data-t="dateCaps"></b><span data-t="dateSub"></span></p>
+      <p class="caps sm t block"><b data-t="venueName"></b><span data-t="venueAddr"></span></p>
+      <p class="caps sm t block" style="--d:1.5s"><span data-t="hostsLabel"></span><b data-t="hosts"></b></p>
+
+      <div class="actions t">
+        <a class="btn" id="map" target="_blank" rel="noopener" data-t="map"></a>
+        <a class="btn" id="cal" target="_blank" rel="noopener" data-t="cal"></a>
+        <button class="btn fill" id="answer" type="button" data-t="answer"></button>
+      </div>
+
+      <div class="rsvp" id="rsvp" hidden>
+        <form id="form" novalidate>
+          <label class="field"><span data-t="nameLabel"></span>
+            <input type="text" id="who" autocomplete="name" enterkeyhint="done">
+          </label>
+          <fieldset>
+            <label class="choice"><input type="radio" name="come" value="yes"><span data-t="yes"></span></label>
+            <label class="choice"><input type="radio" name="come" value="no"><span data-t="no"></span></label>
+          </fieldset>
+          <div id="count" hidden>
+            <div class="step"><span data-t="adults"></span>
+              <div><button type="button" data-step="adults" data-d="-1" aria-label="−">−</button><output id="adults">1</output><button type="button" data-step="adults" data-d="1" aria-label="+">+</button></div>
+            </div>
+            <div class="step"><span data-t="kids"></span>
+              <div><button type="button" data-step="kids" data-d="-1" aria-label="−">−</button><output id="kids">0</output><button type="button" data-step="kids" data-d="1" aria-label="+">+</button></div>
+            </div>
+          </div>
+          <p class="error" id="error" role="alert"></p>
+          <button class="btn fill" type="submit" data-t="send"></button>
+        </form>
+        <div class="done" id="done" hidden>
+          <p id="doneText"></p>
+          <button class="btn" type="button" id="edit" data-t="edit"></button>
+        </div>
+      </div>
+
+      <button class="again t" style="--d:2s" id="again" type="button" data-t="again"></button>
+    </div>
+  </section>
+
+  <div class="grain"></div>
+  <div class="light"></div>
+
+  <button class="ctl music" id="music" type="button" aria-label="Әуенді қосу" aria-pressed="false"><i></i><i></i><i></i><i></i></button>
+  <button class="ctl skip" id="skip" type="button" data-t="skip"></button>
+  <div class="ctl bar" id="bar"></div>
+</main>
+
+<audio id="bgm" src="music.mp3" loop preload="auto" autoplay></audio>
+
+<script>
+// Той мәліметтері — барлығы осы жерде өзгертіледі
+const TOI = {
+  start: "2026-11-11T18:00:00+05:00",
+  end: "2026-11-11T23:30:00+05:00",
+  startTime: "18:00",
+  mapUrl: "https://2gis.kz/shymkent/geo/70000001117985940",
+  sheetUrl: "https://script.google.com/macros/s/AKfycbzTy9QB0BqtTCpKyOuPIdnxZ-2FWfw3eaaBVTYGNubkGwW4rkbb0qXWOUxbDdpgf-ShOA/exec",   // Google Apps Script сілтемесі (google-sheet.gs ішіндегі нұсқаулықты қараңыз); бос болса жауап тек қонақтың браузерінде қалады
+  name: "Назерке", nameGen: "Назеркенің",
+  hosts: "Мұхит – Гүлдана",
+  weekday: "сәрсенбі",
+  dateCaps: "11 қараша 2026",
+  venueName: "«Grand Emirates»", venueAddr: "тойханасы · Арыс қаласы",
+  venue: "«Grand Emirates» тойханасы", addr: "Арыс қаласы"
+};
+
+const t = {
+  ...TOI,
+  title: `${TOI.nameGen} ұзату тойына шақыру`,
+  guest: g => g ? `Құрметті ${g}!` : "Құрметті қонақ!",
+  coverTitle: "Шақыру",
+  coverSub: "сізге арналған",
+  open: "Ашу",
+  kind: "Қыз ұзату тойы",
+  hostsLabel: "Той иелері",
+  invite1: "Сіздерді аяулы қызымыз",
+  invite2: `${TOI.nameGen} ұзату тойының қадірлі қонағы болуға`,
+  invite3: "шақырамыз",
+  inviteFull: `Құрметті ағайын-туыс, құда-жекжат, дос-жарандар! Сіздерді аяулы қызымыз ${TOI.nameGen} ұзату тойына арналған салтанатты ақ дастарханымыздың қадірлі қонағы болуға шақырамыз.`,
+  timeLine: `сағат ${TOI.startTime}-де`,
+  dateSub: `${TOI.weekday} · сағат ${TOI.startTime}`,
+  map: "2GIS картасынан ашу", cal: "Күнтізбеге қосу", answer: "Жауап беру",
+  nameLabel: "Аты-жөніңіз",
+  yes: "Иә, барамын", no: "Өкінішке орай, келе алмаймын",
+  adults: "Ересектер", kids: "Балалар",
+  send: "Жауапты жіберу", edit: "Жауапты өзгерту",
+  errName: "Аты-жөніңізді жазыңыз",
+  errCome: "Келетін-келмейтініңізді таңдаңыз",
+  errSend: "Жауап жіберілмеді. Интернетті тексеріп, қайта басыңыз",
+  sending: "Жіберілуде…",
+  doneYes: (n, a, k) => `Рақмет, ${n}! ${a} ересек${k ? `, ${k} бала` : ""} деп жазып алдық. Тойда күтеміз.`,
+  doneNo: n => `Жауабыңызға рақмет, ${n}. Тілектес екеніңізді білеміз.`,
+  skip: "Өткізу", again: "Қайта көру"
+};
+
+const $ = id => document.getElementById(id);
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} }
+};
+const guest = (new URLSearchParams(location.search).get("to") || "").trim().slice(0, 60);
+
+// Мәтіндер мен сілтемелер
+document.title = t.title;
+document.querySelectorAll("[data-t]").forEach(n => { n.textContent = t[n.dataset.t]; });
+$("guest").textContent = t.guest(guest);
+const z = s => new Date(s).toISOString().replace(/[-:]|\.\d{3}/g, "");
+$("cal").href = "https://calendar.google.com/calendar/render?action=TEMPLATE"
+  + "&text=" + encodeURIComponent(t.title)
+  + "&dates=" + z(TOI.start) + "/" + z(TOI.end)
+  + "&location=" + encodeURIComponent(TOI.venue + ", " + TOI.addr);
+$("map").href = TOI.mapUrl;
+
+// Көріністер кезегі: мұқаба түртумен ашылады, қалғаны өзі ауысады, соңғысы — қорытынды бет
+const stage = $("stage"), scenes = [...document.querySelectorAll("[data-s]")], bar = $("bar");
+const last = scenes.length - 1;
+let cur = 0, timer;
+function go(i) {
+  clearTimeout(timer);
+  cur = Math.max(0, Math.min(last, i));
+  scenes.forEach((s, n) => s.classList.toggle("on", n === cur));
+  stage.classList.toggle("play", cur > 0 && cur < last);
+  stage.classList.toggle("end", cur === last);
+  const ms = +scenes[cur].dataset.s;
+  bar.getAnimations().forEach(a => a.cancel());
+  if (ms) {
+    bar.animate([{ transform: "scaleX(0)" }, { transform: "scaleX(1)" }], { duration: ms, fill: "forwards" });
+    timer = setTimeout(() => go(cur + 1), ms);
+  }
+  if (cur === last) $("final").scrollTop = 0;
+}
+stage.addEventListener("click", e => {
+  if (cur === 0 || cur === last || e.target.closest("button, a")) return;
+  go(cur + 1);
+});
+$("skip").addEventListener("click", () => go(last));
+$("again").addEventListener("click", () => go(1));
+$("open").addEventListener("click", () => { if (bgm.paused && !muted) setMusic(true); go(1); });
+
+// Әуен
+const bgm = $("bgm"), musicBtn = $("music");
+function setMusic(on) {
+  if (on) bgm.play().then(() => shown(true)).catch(() => shown(false));
+  else { bgm.pause(); shown(false); }
+}
+function shown(on) {
+  musicBtn.classList.toggle("on", on);
+  musicBtn.setAttribute("aria-pressed", on);
+  musicBtn.setAttribute("aria-label", on ? "Әуенді өшіру" : "Әуенді қосу");
+}
+let muted = false;
+musicBtn.addEventListener("click", () => { muted = !bgm.paused; setMusic(bgm.paused); });
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) { if (!bgm.paused) setMusic(false); }
+  else if (!muted) setMusic(true);
+});
+// Әуен сайт ашылғанда бірден қосылады; браузер дыбысты бұғаттаса — экранға алғаш тигенде
+bgm.volume = .6;
+bgm.addEventListener("play", () => shown(true));
+function firstTouch(e) {
+  if (!e.target.closest || !e.target.closest("#music")) { if (bgm.paused && !muted) setMusic(true); }
+  ["pointerdown", "touchend", "keydown"].forEach(n => document.removeEventListener(n, firstTouch, true));
+}
+["pointerdown", "touchend", "keydown"].forEach(n => document.addEventListener(n, firstTouch, true));
+setMusic(true);
+
+// Жауап
+function showAnswer() {
+  const a = store.get("toi-rsvp");
+  $("form").hidden = !!a;
+  $("done").hidden = !a;
+  if (a) $("doneText").textContent = a.come === "yes" ? t.doneYes(a.name, a.adults, a.kids) : t.doneNo(a.name);
+}
+const form = $("form");
+$("answer").addEventListener("click", () => {
+  $("rsvp").hidden = false;
+  $("answer").hidden = true;
+  const fin = $("final");
+  fin.scrollTo({ top: $("rsvp").getBoundingClientRect().top - fin.getBoundingClientRect().top + fin.scrollTop, behavior: "smooth" });
+});
+form.addEventListener("change", () => { $("count").hidden = form.come.value !== "yes"; $("error").textContent = ""; });
+form.addEventListener("click", e => {
+  const b = e.target.closest("[data-step]");
+  if (!b) return;
+  const out = $(b.dataset.step), min = b.dataset.step === "adults" ? 1 : 0;
+  out.value = Math.min(20, Math.max(min, +out.value + +b.dataset.d));
+});
+// Жауап Google кестесіне кетеді; id бір қонақтың қайта жауабы жаңа жол емес, ескісін жаңартуы үшін керек
+async function sendAnswer(a) {
+  if (!TOI.sheetUrl) return true;
+  try {
+    await fetch(TOI.sheetUrl, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(a) });
+    return true;
+  } catch { return false; }
+}
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  const name = $("who").value.trim();
+  if (!name) { $("error").textContent = t.errName; $("who").focus(); return; }
+  if (!form.come.value) { $("error").textContent = t.errCome; return; }
+  const old = store.get("toi-rsvp");
+  const id = old && old.id || Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+  const yes = form.come.value === "yes";
+  const a = { id, name, come: form.come.value, adults: yes ? +$("adults").value : 0, kids: yes ? +$("kids").value : 0, invited: guest };
+  const btn = form.querySelector("[type=submit]");
+  btn.disabled = true; btn.textContent = t.sending;
+  const ok = await sendAnswer(a);
+  btn.disabled = false; btn.textContent = t.send;
+  if (!ok) { $("error").textContent = t.errSend; return; }
+  store.set("toi-rsvp", a);
+  showAnswer();
+});
+$("edit").addEventListener("click", () => { $("form").hidden = false; $("done").hidden = true; });
+if (guest) $("who").value = guest;
+showAnswer();
+if (store.get("toi-rsvp")) { $("rsvp").hidden = false; $("answer").hidden = true; }
+</script>
+</body>
+</html>
